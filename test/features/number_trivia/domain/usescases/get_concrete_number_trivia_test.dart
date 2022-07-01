@@ -3,35 +3,44 @@ import 'package:clean_architecture/features/number_trivia/domain/repositories/nu
 import 'package:clean_architecture/features/number_trivia/domain/usecases/get_concrete_number_trivia.dart';
 import 'package:dartz/dartz.dart';
 import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockNumberTriviaRepository extends Mock
     implements NumberTriviaRepository {}
 
+@GenerateMocks([
+  NumberTriviaRepository
+], customMocks: [
+  MockSpec<NumberTriviaRepository>(
+      as: #MockRandomNumberTrivia, returnNullOnMissingStub: true)
+])
 void main() {
+  late int tNumber;
+  late NumberTrivia tNumberTrivia;
   late GetConcreteNumberTrivia usecase;
-  late MockNumberTriviaRepository mockNumberTriviaRepository;
+  late NumberTriviaRepository mockRNumberTriviaRepository;
   setUp(() {
-    mockNumberTriviaRepository = MockNumberTriviaRepository();
-    usecase = GetConcreteNumberTrivia(mockNumberTriviaRepository);
+    mockRNumberTriviaRepository = MockNumberTriviaRepository();
+    usecase = GetConcreteNumberTrivia(mockRNumberTriviaRepository);
+    tNumber = 1;
+    tNumberTrivia = NumberTrivia(text: "test", number: tNumber);
   });
 
-  var tNumber = 1;
-  final tNumberTrivia = NumberTrivia(text: "test", number: tNumber);
   test('should get trivia for the number from the repository', () async {
     // arrange
     // it returns null here instead of the right
-    when(mockNumberTriviaRepository.getConcreteNumberTrivia(tNumber))
+    when(mockRNumberTriviaRepository.getConcreteNumberTrivia(tNumber))
         .thenAnswer((_) async => Right(tNumberTrivia));
     // act
     final result = await usecase(Params(number: tNumber));
 
     //assert
 
-    expect(result, Right(tNumberTrivia));
+    expect(result, equals(Right(tNumberTrivia)));
 
-    verify(mockNumberTriviaRepository.getConcreteNumberTrivia(tNumber));
+    verify(mockRNumberTriviaRepository.getConcreteNumberTrivia(tNumber));
 
-    verifyNoMoreInteractions(mockNumberTriviaRepository);
+    verifyNoMoreInteractions(mockRNumberTriviaRepository);
   });
 }
